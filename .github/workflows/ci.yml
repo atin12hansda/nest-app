@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    name: Test and Build (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["18.x", "20.x"]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        # If you use yarn/pnpm replace this line:
+        run: npm ci
+
+      - name: Lint
+        # ensure you have a lint script in package.json: "lint": "eslint ."
+        run: npm run lint --if-present
+
+      - name: Build
+        # ensure you have a build script in package.json: "build": "nest build" or similar
+        run: npm run build --if-present
+
+      - name: Run tests
+        env:
+          CI: true
+        run: npm test --if-present
+
+      - name: Upload coverage (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage || coverage/** || ./coverage || ./coverage/**
