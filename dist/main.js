@@ -14,5 +14,4 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
     await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
 //# sourceMappingURL=main.js.map
